@@ -1,0 +1,137 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MRS Control</title>
+    <style>
+        .grid {
+            display: grid;
+            grid-template-columns: repeat(10, 50px);
+            grid-template-rows: repeat(10, 50px);
+        }
+
+        .grid-cell {
+            width: 50px;
+            height: 50px;
+            border: 1px solid black;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+        }
+
+        .robot {
+            background-color: blue;
+            color: white;
+        }
+
+        .wall {
+            background-color: black;
+        }
+    </style>
+    <script>
+        document.addEventListener("DOMContentLoaded", function () {
+            const mazeGrid = document.getElementById("mazeGrid");
+            let robotPositions = [];
+
+            function renderMaze(maze) {
+                mazeGrid.innerHTML = ''; // Clear existing maze
+
+                // Render maze in reverse order
+                for (let x = 0; x <= maze.length - 1; x++) {
+                    for (let y = maze[x].length - 1; y >= 0; y--) {
+                        const cell = document.createElement("div");
+                        cell.classList.add("grid-cell");
+                        cell.dataset.x = x;
+                        cell.dataset.y = y;
+                        // Check if the cell is at the border (wall) or inner (indexed)
+                        if (x === 0 || x === 9 || y === 0 || y === 9) {
+                            cell.classList.add("wall");
+                        } else {
+                            if (maze[x][y+1].isWall) {
+                                cell.classList.add("wall");
+                            } else {
+                                cell.addEventListener("click", function () {
+                                    fetch(`http://localhost:4500/target?x=${y - 1}&y=${x - 1}`)
+                                        .then(response => response.json())
+                                        .then(data => console.log(data))
+                                        .catch(error => console.error('Error:', error));
+                                });
+                            }
+                        }
+                        mazeGrid.appendChild(cell);
+                    }
+                }
+            }
+
+            function updateRobotPositions() {
+                fetch('http://localhost:4500/getposition')
+                    .then(response => response.json())
+                    .then(data => {
+                        robotPositions = data;
+                        markRobotsOnGrid();
+                    })
+                    .catch(error => console.error('Error fetching robot positions:', error));
+            }
+            function convertCoordinate(inputValue) {
+                // Normalize the input value to the range [0, 1.75]
+                let normalizedValue = inputValue + 0.875;
+
+                // Scale to the range [0, 7] and convert to integer
+                let convertedValue = Math.floor(normalizedValue * 8 / 1.75);
+
+                // Ensure the value is within the target range [0, 7]
+                convertedValue = Math.max(0, Math.min(convertedValue, 7));
+                return convertedValue;
+            }
+            function markRobotsOnGrid() {
+                document.querySelectorAll('.robot').forEach(robot => {
+                    robot.classList.remove('robot');
+                    robot.textContent = '';
+                });
+
+                robotPositions.forEach(robot => {
+                    let x = convertCoordinate(parseFloat(robot.position[0]));
+                    let y = convertCoordinate(parseFloat(robot.position[1]));
+
+                    // Shift robot position one column to the left
+                    y = y + 1; // Subtract 1 from the x coordinate
+
+                    // Ensure x is within the grid boundaries
+                    if (x < 0) {
+                        x = 0; // If x is less than 0, reset to 0
+                    }
+
+                    // Calculate cell index based on new grid orientation and shifted position
+                    const cellIndex = (y) * 10 + (8 - x);
+                    if (cellIndex < mazeGrid.children.length) {
+                        const cell = mazeGrid.children[cellIndex];
+                        cell.classList.add('robot');
+                        // cell.textContent = "robot";
+                    }
+                });
+            }
+
+
+            function fetchMaze() {
+                fetch('http://localhost:4500/maze')
+                    .then(response => response.json())
+                    .then(maze => renderMaze(maze))
+                    .catch(error => console.error('Error fetching maze:', error));
+            }
+
+            fetchMaze();
+            setInterval(() => {
+                updateRobotPositions();
+            }, 2000);
+        });
+    </script>
+</head>
+
+<body>
+    <div id="mazeGrid" class="grid"></div>
+</body>
+
+</html>

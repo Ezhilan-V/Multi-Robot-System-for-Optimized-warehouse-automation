@@ -1,0 +1,130 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Maze Grid</title>
+    <style>
+        .grid {
+            display: grid;
+            grid-template-columns: repeat(10, 50px);
+            /* Adjust grid column size */
+            grid-template-rows: repeat(10, 50px);
+            /* Adjust grid row size */
+        }
+
+        .grid-cell {
+            width: 50px;
+            /* Cell width */
+            height: 50px;
+            /* Cell height */
+            border: 1px solid black;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+        }
+
+        .robot {
+            background-color: blue;
+            /* Robot cell color */
+            color: white;
+            /* Robot text color */
+        }
+
+        .wall {
+            background-color: black;
+            /* Wall cell color */
+        }
+    </style>
+    <script>
+        document.addEventListener("DOMContentLoaded", function () {
+            const mazeGrid = document.getElementById("mazeGrid");
+            let robotPositions = [];
+
+            function renderMaze(maze) {
+                mazeGrid.innerHTML = ''; // Clear existing maze
+
+                // Render maze in reverse order
+                for (let y = maze.length - 1; y >= 0; y--) {
+                    for (let x = maze[y].length - 1; x >= 0; x--) {
+                        const cell = document.createElement("div");
+                        cell.classList.add("grid-cell");
+                        cell.dataset.x = x;
+                        cell.dataset.y = y;
+
+                        if (maze[y][x].isWall) {
+                            cell.classList.add("wall");
+                        } else {
+                            cell.addEventListener("click", function () {
+                                fetch(`http://localhost:4500/target?x=${x}&y=${y}`)
+                                    .then(response => response.json())
+                                    .then(data => console.log(data))
+                                    .catch(error => console.error('Error:', error));
+                            });
+                        }
+                        mazeGrid.appendChild(cell);
+                    }
+                }
+            }
+            function updateRobotPositions() {
+                fetch('http://localhost:4500/getposition')
+                    .then(response => response.json())
+                    .then(data => {
+                        robotPositions = data;
+                        markRobotsOnGrid();
+                    })
+                    .catch(error => console.error('Error fetching robot positions:', error));
+            }
+            function convertCoordinate(inputValue) {
+                // Normalize the input value to the range [0, 1.75]
+                let normalizedValue = inputValue + 0.875;
+
+                // Scale to the range [0, 7] and convert to integer
+                let convertedValue = Math.floor(normalizedValue * 8 / 1.75);
+
+                // Ensure the value is within the target range [0, 7]
+                convertedValue = Math.max(0, Math.min(convertedValue, 7)) + 1;
+                return convertedValue;
+            }
+
+            function markRobotsOnGrid() {
+                document.querySelectorAll('.robot').forEach(robot => {
+                    robot.classList.remove('robot');
+                    robot.textContent = '';
+                });
+
+                robotPositions.forEach(robot => {
+                    const x = convertCoordinate(parseFloat(robot.position[0]));
+                    const y = convertCoordinate(parseFloat(robot.position[1]));
+
+                    // Calculate cell index based on new grid orientation
+                    const cellIndex = (7 - y) * 10 + (7 - x);
+                    if (cellIndex < mazeGrid.children.length) {
+                        const cell = mazeGrid.children[cellIndex];
+                        cell.classList.add('robot');
+                        cell.textContent = robot.name;
+                    }
+                });
+            }
+            function fetchMaze() {
+                fetch('http://localhost:4500/maze')
+                    .then(response => response.json())
+                    .then(maze => renderMaze(maze))
+                    .catch(error => console.error('Error fetching maze:', error));
+            }
+
+            fetchMaze();
+            updateRobotPositions();
+        });
+
+    </script>
+</head>
+
+<body>
+    <div id="mazeGrid" class="grid"></div>
+    <script src="maze.js"></script> <!-- Include your JavaScript file -->
+</body>
+
+</html>

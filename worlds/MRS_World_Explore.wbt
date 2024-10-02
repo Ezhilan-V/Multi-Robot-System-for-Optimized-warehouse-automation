@@ -1,0 +1,65 @@
+#VRML_SIM R2023b utf8
+
+EXTERNPROTO "https://raw.githubusercontent.com/cyberbotics/webots/R2023b/projects/objects/backgrounds/protos/TexturedBackground.proto"
+EXTERNPROTO "https://raw.githubusercontent.com/cyberbotics/webots/R2023b/projects/objects/backgrounds/protos/TexturedBackgroundLight.proto"
+EXTERNPROTO "https://raw.githubusercontent.com/cyberbotics/webots/R2023b/projects/objects/floors/protos/RectangleArena.proto"
+EXTERNPROTO "https://raw.githubusercontent.com/cyberbotics/webots/R2023b/projects/robots/gctronic/e-puck/protos/E-puck.proto"
+EXTERNPROTO "https://raw.githubusercontent.com/cyberbotics/webots/R2023b/projects/objects/factory/containers/protos/CardboardBox.proto"
+
+WorldInfo {
+}
+Viewpoint {
+  orientation 0.05543505259216308 -0.9974918694110777 0.04401051468567272 4.711969148542518
+  position -0.4560290805948024 1.1443230488866263 12.352035724428399
+}
+TexturedBackground {
+}
+TexturedBackgroundLight {
+}
+RectangleArena {
+  floorSize 2 2
+}
+DEF EPUCK1 E-puck {
+  hidden position_0_0 714.2311547813941
+  hidden position_0_1 691.8712262546068
+  hidden rotation_1 0 -0.9999999999999999 0 2.0519702370787196
+  hidden rotation_2 0 1 0 0.7208424648522552
+  translation 0.3750000558733394 0.625000010349552 -6.505368704158403e-05
+  rotation -2.0868287195372868e-05 -0.9999999997305223 1.017200700635609e-05 2.22077561834128e-05
+  name "EPUCK1"
+  controller "Explore"
+}
+Robot {
+  name "supervisor"
+  controller "supervisor"
+  supervisor TRUE
+}
+DEF EPUCK2 E-puck {
+  hidden position_0_0 726.9101892443473
+  hidden position_0_1 703.8402023316052
+  hidden rotation_1 0 -1 0 1.9393063884847381
+  hidden rotation_2 0 1 0 0.12344792749146999
+  translation -0.6249999999978891 -0.12479412732310187 -6.478299772066237e-05
+  rotation 0.9999987818909498 -0.0015608360366859092 2.7355304272985777e-06 1.2070733999777977e-06
+  name "EPUCK2"
+  controller "Explore"
+}
+DEF EPUCK3 E-puck {
+  hidden position_0_0 739.5274558525318
+  hidden position_0_1 715.3867600882618
+  hidden rotation_1 0 -1 0 1.8884103946593744
+  hidden rotation_2 0 -1 0 0.8963649302110773
+  translation 0.12499999970168439 0.12446514180370603 -6.422717104035379e-05
+  rotation -0.999866141831976 0.016315524226160043 0.0012255966974161444 1.2556585078385519e-06
+  name "EPUCK3"
+  controller "Explore"
+}
+CardboardBox {
+  translation -0.14 -0.59 0.13
+  size 0.25 0.75 0.25
+}
+CardboardBox {
+  translation 0.62 0.38 0.12
+  name "cardboard box(1)"
+  size 0.75 0.25 0.25
+}
